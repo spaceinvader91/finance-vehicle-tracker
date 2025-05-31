@@ -1,0 +1,265 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* Define custom properties for a dark animated gradient theme */
+:root {
+    --bg-start: #1a1a2e; /* Deep navy */
+    --bg-mid: #16213e; /* Dark blue */
+    --bg-end: #1e2a78; /* Lighter dark blue */
+
+    --accent-color: #9B59B6;
+    --accent-hover: #8E44AD;
+    --border-color: #444;
+    --transition-speed: 0.3s;
+}
+
+/* Animated Background on Body */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(45deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+    background-size: 600% 600%;
+    animation: gradientShift 15s ease infinite;
+    color: #ffffff;
+    margin: 0;
+    padding: 20px;
+    padding-bottom: 600px;
+}
+
+/* Keyframes for Animated Background */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Tab Navigation */
+.tab {
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+    .tab button {
+        background: transparent;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        color: #fff;
+        transition: background var(--transition-speed);
+        font-size: 17px;
+    }
+
+        .tab button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .tab button.active {
+            background-color: var(--accent-color);
+        }
+
+/* Tab Content */
+.tabcontent {
+    display: none;
+}
+
+/* Finance Columns Layout */
+.finance-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.column-left,
+.column-right {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Header */
+header {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.4);
+    margin-bottom: 20px;
+}
+
+/* Sections */
+section {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    margin: 10px auto;
+    border-radius: 10px;
+    max-width: 700px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform var(--transition-speed);
+}
+
+    section:hover {
+        transform: translateY(-5px);
+    }
+
+/* Collapsible Direct Debit List with Scrollbar */
+#debitList {
+    max-height: 600px; /* Fixed height for scrollable content */
+    overflow-y: auto;
+    transition: max-height var(--transition-speed);
+}
+
+    #debitList.collapsed {
+        max-height: 0;
+    }
+
+/* Inputs, Buttons & Selectors */
+input,
+select {
+    padding: 12px;
+    margin: 8px;
+    width: calc(100% - 24px);
+    background: var(--bg-end); /* Slightly lighter for contrast */
+    color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    transition: all var(--transition-speed) ease-in-out;
+    font-size: 1em;
+}
+
+    input:focus,
+    select:focus {
+        border-color: var(--accent-color);
+        outline: none;
+    }
+
+button {
+    padding: 12px 20px;
+    margin: 8px;
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease-in-out;
+    font-size: 1em;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+}
+
+    button:hover {
+        background: var(--accent-hover);
+        transform: scale(1.05);
+    }
+
+/* Bold Key Figures */
+strong {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* List Styling for Direct Debits & Income */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: var(--bg-end);
+    padding: 10px;
+    margin: 6px auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform var(--transition-speed);
+}
+
+    li:hover {
+        transform: scale(1.02);
+    }
+
+/* Styling for Paid Direct Debits */
+.paid {
+    opacity: 0.6;
+    text-decoration: line-through;
+    border: 2px solid var(--accent-hover);
+}
+
+/* Table Styling for Vehicle Tracker */
+#vehicleTable {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+    #vehicleTable th,
+    #vehicleTable td {
+        padding: 15px 20px;
+        border: 1px solid var(--border-color);
+        text-align: center;
+        background: var(--bg-end);
+    }
+
+    #vehicleTable th {
+        background: var(--accent-color);
+        font-weight: 700;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    /* Enlarge Date Inputs for Vehicle Tracker */
+    #vehicleTable input[type="date"] {
+        font-size: 1.2em;
+        padding: 8px;
+    }
+
+/* Mobile Responsive Adjustments */
+@media screen and (max-width: 600px) {
+    /* Stack finance columns vertically */
+    .finance-columns {
+        flex-direction: column;
+    }
+
+    /* Adjust tab button size */
+    .tab button {
+        font-size: 16px;
+        padding: 12px 14px;
+    }
+
+    /* Increase touch target sizes */
+    input,
+    select,
+    button {
+        font-size: 1.1em;
+        padding: 14px;
+        margin: 10px 0;
+    }
+
+    header, section {
+        padding: 15px;
+    }
+
+    /* Optimize Vehicle Tracker */
+    #vehicleTable {
+        width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+
+        #vehicleTable th,
+        #vehicleTable td {
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        #vehicleTable input[type="date"] {
+            font-size: 1em;
+            padding: 6px;
+        }
+}
