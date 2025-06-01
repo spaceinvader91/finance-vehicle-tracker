@@ -1,4 +1,4 @@
-﻿// TAB SWITCHING FUNCTIONALITY
+// Switch between tabs
 function openTab(tabName) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
@@ -13,46 +13,56 @@ function openTab(tabName) {
     event.currentTarget.classList.add("active");
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Open the default tab (finance) on page load
-    document.getElementsByClassName("tablinks")[0].click();
-    updateDateTime();
-    calculateNextPayday();
-    loadSavedData();    // Finance data
-    loadVehicleData();  // Vehicle data
-});
-
-// ---------- [Finance Tracker Functions] ----------
-
-// Update Date & Time Display
-function updateDateTime() {
-    const now = new Date();
-    document.getElementById("dateTime").innerText = now.toLocaleString();
-}
-
-// Calculate Next Payday (Last Friday of the Month)
-function calculateNextPayday() {
-    const today = new Date();
-    let year = today.getFullYear();
-    let month = today.getMonth() + 1;
-    let lastDay = new Date(year, month, 0);
-    while (lastDay.getDay() !== 5) {
-        lastDay.setDate(lastDay.getDate() - 1);
+// Clear local storage with confirmation
+function clearLocalData() {
+    if (confirm("Are you sure you want to clear all local data?")) {
+        localStorage.clear();
+        location.reload();
     }
-    document.getElementById("nextPayday").innerText = lastDay.toDateString();
 }
 
-// Track (or Update) the Single Income Entry
+// ---------------- Income List Persistence Functions ----------------
+function saveIncomeList() {
+    let incomeListHTML = document.getElementById("incomeList").innerHTML;
+    localStorage.setItem("incomeList", incomeListHTML);
+}
+
+function loadIncomeList() {
+    let incomeListHTML = localStorage.getItem("incomeList");
+    if (incomeListHTML) {
+        document.getElementById("incomeList").innerHTML = incomeListHTML;
+    }
+}
+
+// Import Button
+function triggerImport() {
+    document.getElementById("importFile").click();
+}
+
+// ---------------- Direct Debits List Persistence Functions ----------------
+function saveDirectDebitsList() {
+    let debitListHTML = document.getElementById("debitList").innerHTML;
+    localStorage.setItem("debitList", debitListHTML);
+}
+
+function loadDirectDebitsList() {
+    let debitListHTML = localStorage.getItem("debitList");
+    if (debitListHTML) {
+        document.getElementById("debitList").innerHTML = debitListHTML;
+    }
+}
+
+// ---------------- Add Income ----------------
 function addIncome() {
     const source = document.getElementById("incomeSource").value;
     const amount = parseFloat(document.getElementById("incomeAmount").value);
     if (!source || isNaN(amount)) return;
-    document.getElementById("incomeList").innerHTML = `<li>${source}: <strong>€${amount.toFixed(2)}</strong></li>`;
-    updateAllSavings();
-    saveDataToLocalStorage();
+    document.getElementById("incomeList").innerHTML = `<li>${source}: €${amount.toFixed(2)}</li>`;
+    saveIncomeList();
+    updateSummary();
 }
 
-// Add Direct Debit Entry with Remove and Mark-as-Paid Buttons
+// ---------------- Add Direct Debit ----------------
 function addDebit() {
     const company = document.getElementById("debitCompany").value;
     const amount = parseFloat(document.getElementById("debitAmount").value);
@@ -60,88 +70,106 @@ function addDebit() {
     const currency = document.getElementById("currencySelector").value;
     if (!company || isNaN(amount) || isNaN(paymentDay)) return;
 
-    // Calculate the due date and adjust for weekends
     let paymentDate = new Date();
     paymentDate.setDate(paymentDay);
+    // Adjust if payment day falls on weekend
     if (paymentDate.getDay() === 6) paymentDate.setDate(paymentDate.getDate() + 2);
     else if (paymentDate.getDay() === 0) paymentDate.setDate(paymentDate.getDate() + 1);
 
     const currencySymbol = (currency === "€") ? "€" : "£";
-    const listItem = document.createElement("li");
-    // Embed the due date in a data attribute for sorting
-    listItem.setAttribute("data-due", paymentDate.toISOString());
-    listItem.innerHTML = `${company}: ${currencySymbol}${amount.toFixed(2)} (Due: ${paymentDate.toDateString()}) `;
+    const li = document.createElement("li");
+    li.setAttribute("data-due", paymentDate.toISOString());
+    li.innerHTML = `${company}: ${currencySymbol}${amount.toFixed(2)} (Due: ${paymentDate.toDateString()}) 
+  <button onclick="markAsPaid(this)">Mark as Paid</button>
+  <button onclick="removeDebit(this)">Remove</button>`;
 
-    // Create "Mark as Paid" Button
-    const paidButton = document.createElement("button");
-    paidButton.textContent = "Mark as Paid";
-    paidButton.style.marginLeft = "10px";
-    paidButton.onclick = function () {
-        listItem.classList.toggle("paid");
-        saveDataToLocalStorage();
-    };
-    listItem.appendChild(paidButton);
-
-    // Create "Remove" Button
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Remove";
-    removeButton.style.marginLeft = "10px";
-    removeButton.onclick = function () {
-        listItem.remove();
-        updateAllSavings();
-        saveDataToLocalStorage();
-    };
-    listItem.appendChild(removeButton);
-
-    document.getElementById("debitList").appendChild(listItem);
+    document.getElementById("debitList").appendChild(li);
     sortDebits();
-    updateAllSavings();
-    saveDataToLocalStorage();
+    saveDirectDebitsList();
+    updateSummary();
 }
 
-// Toggle the visibility of the Direct Debit list (collapsible)
-function toggleDebitList() {
-    const debitList = document.getElementById("debitList");
-    debitList.classList.toggle("collapsed");
-}
-
-
-// Automatically sort debit items by due date (earliest first)
+// ---------------- Sort Direct Debits ----------------
 function sortDebits() {
     const list = document.getElementById("debitList");
     const items = Array.from(list.getElementsByTagName("li"));
     items.sort((a, b) => new Date(a.getAttribute("data-due")) - new Date(b.getAttribute("data-due")));
     items.forEach(item => list.appendChild(item));
+    saveDirectDebitsList();
 }
 
-// Update Total Direct Debits, converting GBP entries to EUR when necessary
+// ---------------- Mark a Debit as Paid ----------------
+function markAsPaid(btn) {
+    const li = btn.parentElement;
+    li.classList.toggle("paid");
+    saveDirectDebitsList();
+    updateSummary();
+}
+
+// ---------------- Remove a Direct Debit ----------------
+function removeDebit(btn) {
+    const li = btn.parentElement;
+    li.remove();
+    saveDirectDebitsList();
+    updateSummary();
+}
+
+// ---------------- Toggle Direct Debits List (Collapse/Expand) ----------------
+function toggleDebitList() {
+    const list = document.getElementById("debitList");
+    list.classList.toggle("collapsed");
+    saveDirectDebitsList();
+}
+
+// ---------------- Update Total Direct Debits ----------------
+// Calculates separate totals for EUR and GBP debits, and an overall total in EUR (GBP converted to EUR).
 function updateTotalDebits() {
     let totalDebitsEUR = 0;
+    let totalDebitsGBP = 0;
+
     document.querySelectorAll("#debitList li").forEach(item => {
         const text = item.textContent;
-        // Look for a currency symbol (€ or £) followed by the numeric value.
         const match = text.match(/[€£]([\d.]+)/);
         if (match) {
             let amt = parseFloat(match[1]);
-            // Determine currency based on the presence of the Pound symbol
+            // Check currency symbol in text
             const curr = text.includes("£") ? "£" : "€";
             if (curr === "£") {
-                amt *= 1.19; // Convert GBP to EUR at a fixed rate
+                totalDebitsGBP += amt;
+            } else {
+                totalDebitsEUR += amt;
             }
-            totalDebitsEUR += amt;
         }
     });
-    document.getElementById("totalDebits").innerHTML = `Total Direct Debits: <strong>€${totalDebitsEUR.toFixed(2)}</strong>`;
-    return totalDebitsEUR;
+
+    const convertedGBP = totalDebitsGBP * 1.19;
+    const overallTotal = totalDebitsEUR + convertedGBP;
+
+    document.getElementById("totalDebits").innerHTML =
+        `EUR Debits: <strong>€${totalDebitsEUR.toFixed(2)}</strong><br>` +
+        `GBP Debits: <strong>£${totalDebitsGBP.toFixed(2)}</strong><br>` +
+        `Overall Total (in EUR): <strong>€${overallTotal.toFixed(2)}</strong>`;
+
+    return overallTotal;
 }
 
+// ---------------- Update Summary ----------------
+// Retrieves income, settings, calculates direct debits total, allowed spending,
+// net savings, period until next payday, and updates Next Payday display.
+function updateSummary() {
+    // Retrieve values from localStorage or current input (if available)
+    let weeklySpend = parseFloat(localStorage.getItem("weeklySpend")) ||
+        parseFloat(document.getElementById("weeklySpend").value) || 0;
+    let currentSavings = parseFloat(localStorage.getItem("currentSavings")) ||
+        parseFloat(document.getElementById("currentSavings").value) || 0;
+    let savingsTarget = parseFloat(localStorage.getItem("savingsTarget")) ||
+        parseFloat(document.getElementById("savingsTarget").value) || 0;
 
-// Unified Savings Calculation Function
-function updateAllSavings() {
-    // Recalculate total direct debits
-    const totalDebits = updateTotalDebits();
+    localStorage.setItem("weeklySpend", weeklySpend);
+    localStorage.setItem("currentSavings", currentSavings);
+    localStorage.setItem("savingsTarget", savingsTarget);
 
-    // Retrieve income; expected format: "Source: <strong>€amount</strong>"
+    // Retrieve income total from the income list (assuming format "Source: €amount")
     let incomeTotal = 0;
     const incomeItem = document.querySelector("#incomeList li");
     if (incomeItem) {
@@ -149,158 +177,96 @@ function updateAllSavings() {
         if (match) { incomeTotal = parseFloat(match[1]); }
     }
 
-    // Compute Gross Savings (income minus direct debits) – not directly displayed
-    // Determine allowed spending based on weekly spend input and period between paydays
-    const weeklySpend = parseFloat(document.getElementById("weeklySpend").value) || 0;
-    const today = new Date();
+    // Correctly calculate Total Money Out
+    const totalDebits = updateTotalDebits(); // This now includes converted GBP amounts
+    const monthlySpending = weeklySpend > 0 ? weeklySpend * 4 : 0;
+    const totalOut = totalDebits + monthlySpending;
 
-    // Compute current payday (most recent Friday)
-    let currentPayday = new Date(today);
-    while (currentPayday.getDay() !== 5) {
-        currentPayday.setDate(currentPayday.getDate() - 1);
-    }
-
-    // Compute next payday as the last Friday of the current month (or next month if already passed)
-    let year = today.getFullYear();
-    let month = today.getMonth() + 1;
-    let nextPayday = new Date(year, month, 0);
-    while (nextPayday.getDay() !== 5) {
-        nextPayday.setDate(nextPayday.getDate() - 1);
-    }
-    if (today > nextPayday) {
-        month = today.getMonth() + 2;
-        nextPayday = new Date(year, month, 0);
-        while (nextPayday.getDay() !== 5) {
-            nextPayday.setDate(nextPayday.getDate() - 1);
-        }
-    }
-
-    const diffDays = (nextPayday - currentPayday) / (1000 * 60 * 60 * 24);
-    const weeks = diffDays / 7;
-    const periodWeeks = Number(weeks.toFixed(2));
-    document.getElementById("periodWeeks").innerHTML = `<strong>${periodWeeks}</strong>`;
-
-    // Allowed spending = weeklySpend × weeks
-    const allowedSpending = weeklySpend * weeks;
-    document.getElementById("allowedSpending").innerHTML = `<strong>€${allowedSpending.toFixed(2)}</strong>`;
-
-    // New definition: Net Monthly Savings = Income - (Total Direct Debits + Allowed Spending)
-    const netMonthlySavings = incomeTotal - totalDebits - allowedSpending;
-    document.getElementById("monthlySavings").innerHTML = `<strong>€${netMonthlySavings.toFixed(2)}</strong>`;
-    document.getElementById("netSavings").innerHTML = `<strong>€${netMonthlySavings.toFixed(2)}</strong>`;
-
-    // Estimated target date calculation:
-    const currentSavings = parseFloat(document.getElementById("currentSavings").value) || 0;
-    const target = parseFloat(document.getElementById("savingsTarget").value);
-    if (target && netMonthlySavings > 0 && target > currentSavings) {
-        const remainingAmount = target - currentSavings;
-        const months = Math.ceil(remainingAmount / netMonthlySavings);
-        const estimatedTargetDate = new Date();
-        estimatedTargetDate.setMonth(estimatedTargetDate.getMonth() + months);
-        document.getElementById("targetDate").innerHTML = `<strong>${estimatedTargetDate.toDateString()}</strong>`;
-    } else {
-        document.getElementById("targetDate").innerHTML = `<strong>N/A</strong>`;
-    }
-
-    //Update Summary
-    updateSummary();
-}
-function updateSummary() {
-    // Retrieve income from the income list (expected format: "Source: €amount")
-    let incomeTotal = 0;
-    const incomeItem = document.querySelector("#incomeList li");
-    if (incomeItem) {
-        const match = incomeItem.innerText.match(/€([\d.]+)/);
-        if (match) {
-            incomeTotal = parseFloat(match[1]);
-        }
-    }
-
-    // Retrieve and recalculate the total direct debits (using your existing function)
-    const totalDebits = updateTotalDebits(); // This function returns the sum in EUR
-
-    // Calculate allowed spending from the weekly spending input and period between current & next payday.
-    const weeklySpend = parseFloat(document.getElementById("weeklySpend").value) || 0;
-    const today = new Date();
-
-    // Find current payday (using Friday as payday)
-    let currentPayday = new Date(today);
-    while (currentPayday.getDay() !== 5) {
-        currentPayday.setDate(currentPayday.getDate() - 1);
-    }
-
-    // Determine next payday as the last Friday of this month (or next month if already passed)
-    let year = today.getFullYear();
-    let month = today.getMonth() + 1;
-    let nextPayday = new Date(year, month, 0);
-    while (nextPayday.getDay() !== 5) {
-        nextPayday.setDate(nextPayday.getDate() - 1);
-    }
-    if (today > nextPayday) {
-        month = today.getMonth() + 2;
-        nextPayday = new Date(year, month, 0);
-        while (nextPayday.getDay() !== 5) {
-            nextPayday.setDate(nextPayday.getDate() - 1);
-        }
-    }
-
-    // Calculate duration in weeks between current and next payday
-    const diffDays = (nextPayday - currentPayday) / (1000 * 60 * 60 * 24);
-    const weeks = diffDays / 7;
-    const allowedSpending = weeklySpend * weeks;
-
-    // Total Money Out = Direct Debits + Allowed Spending
-    const totalOut = totalDebits + allowedSpending;
-
-    // Net Savings = Income - Money Out
+    // Net Savings correctly calculated
     const netSavings = incomeTotal - totalOut;
 
-    // Update the summary section
-    document.getElementById("summary-income").innerText = "€" + incomeTotal.toFixed(2);
-    document.getElementById("summary-out").innerText = "€" + totalOut.toFixed(2);
-    document.getElementById("summary-net").innerText = "€" + netSavings.toFixed(2);
-}
-
-
-// Save All Finance Data to localStorage
-function saveDataToLocalStorage() {
-    const incomeData = document.getElementById("incomeList").innerHTML;
-    const debitData = document.getElementById("debitList").innerHTML;
-    const currentSavings = document.getElementById("currentSavings").value;
-    const savingsTarget = document.getElementById("savingsTarget").value;
-    const weeklySpend = document.getElementById("weeklySpend").value;
-
-    localStorage.setItem("incomeData", incomeData);
-    localStorage.setItem("debitData", debitData);
-    localStorage.setItem("currentSavings", currentSavings);
-    localStorage.setItem("savingsTarget", savingsTarget);
-    localStorage.setItem("weeklySpend", weeklySpend);
-}
-
-// Load Finance Data from localStorage on Page Load
-function loadSavedData() {
-    document.getElementById("incomeList").innerHTML = localStorage.getItem("incomeData") || "";
-    document.getElementById("debitList").innerHTML = localStorage.getItem("debitData") || "";
-    document.getElementById("currentSavings").value = localStorage.getItem("currentSavings") || "";
-    document.getElementById("savingsTarget").value = localStorage.getItem("savingsTarget") || "";
-    document.getElementById("weeklySpend").value = localStorage.getItem("weeklySpend") || "";
-
-    updateAllSavings();
-}
-
-function clearLocalData() {
-    if (confirm("Are you sure you want to clear all local data? This cannot be undone.")) {
-        localStorage.clear();
-        alert("Local data has been cleared.");
-        location.reload();
+    // Calculate next payday (assumed as last Friday of current month)
+    const today = new Date();
+    let nextPayday = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    while (nextPayday.getDay() !== 5) {
+        nextPayday.setDate(nextPayday.getDate() - 1);
     }
+    document.getElementById("nextPayday").innerText = nextPayday.toDateString();
+
+    // Calculate period in days until Next Payday
+    const periodDays = Math.round((nextPayday - today) / (1000 * 60 * 60 * 24));
+
+    // Estimated Target Date Calculation
+    let estimatedTargetDate = "N/A";
+    if (savingsTarget > currentSavings && netSavings > 0) {
+        const monthsNeeded = Math.ceil((savingsTarget - currentSavings) / netSavings);
+        let targetDate = new Date();
+        targetDate.setMonth(targetDate.getMonth() + monthsNeeded);
+        estimatedTargetDate = targetDate.toDateString();
+    }
+
+    // Update summary section
+    document.getElementById("summary-income").innerText = `€${incomeTotal.toFixed(2)}`;
+    document.getElementById("summary-out").innerText = `€${totalOut.toFixed(2)}`;
+    document.getElementById("summary-net").innerText = `€${netSavings.toFixed(2)}`;
+    document.getElementById("targetDate").innerText = estimatedTargetDate;
+    document.getElementById("periodDays").innerText = `${periodDays} days`;
 }
 
 
-// ---------- [Vehicle Tracker Functions] ----------
+// ---------------- Export Local Data ----------------
+function exportLocalData() {
+    const data = {
+        incomeList: localStorage.getItem("incomeList"),
+        debitList: localStorage.getItem("debitList"),
+        weeklySpend: localStorage.getItem("weeklySpend"),
+        currentSavings: localStorage.getItem("currentSavings"),
+        savingsTarget: localStorage.getItem("savingsTarget"),
+        vehicleData: localStorage.getItem("vehicleData")
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "finance-vehicle-data.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
+// ---------------- Import Local Data ----------------
+function importLocalData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.incomeList !== undefined)
+                localStorage.setItem("incomeList", data.incomeList);
+            if (data.debitList !== undefined)
+                localStorage.setItem("debitList", data.debitList);
+            if (data.weeklySpend !== undefined)
+                localStorage.setItem("weeklySpend", data.weeklySpend);
+            if (data.currentSavings !== undefined)
+                localStorage.setItem("currentSavings", data.currentSavings);
+            if (data.savingsTarget !== undefined)
+                localStorage.setItem("savingsTarget", data.savingsTarget);
+            if (data.vehicleData !== undefined)
+                localStorage.setItem("vehicleData", data.vehicleData);
+            alert("Data imported successfully. Refreshing page...");
+            location.reload();
+        } catch (err) {
+            alert("Error reading file: " + err);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// ---------------- Save Vehicle Data ----------------
 function saveVehicleData() {
-    const vehicles = [];
+    let vehicles = [];
     for (let i = 1; i <= 3; i++) {
         let vehicle = {
             name: document.getElementById("vehicle" + i + "Name").value,
@@ -314,11 +280,12 @@ function saveVehicleData() {
     alert("Vehicle data saved!");
 }
 
+// ---------------- Load Vehicle Data ----------------
 function loadVehicleData() {
     let data = localStorage.getItem("vehicleData");
     if (data) {
-        const vehicles = JSON.parse(data);
-        for (let i = 1; i <= 3; i++) {
+        let vehicles = JSON.parse(data);
+        for (let i = 1; i <= vehicles.length; i++) {
             if (vehicles[i - 1]) {
                 document.getElementById("vehicle" + i + "Name").value = vehicles[i - 1].name;
                 document.getElementById("vehicle" + i + "Mot").value = vehicles[i - 1].mot;
@@ -328,3 +295,24 @@ function loadVehicleData() {
         }
     }
 }
+
+// ---------------- Initialize on Page Load ----------------
+document.addEventListener("DOMContentLoaded", () => {
+    // Open the default tab
+    document.getElementById("defaultOpen").click();
+
+    // Load persistent data
+    loadIncomeList();
+    loadDirectDebitsList();
+    loadVehicleData();
+
+    // Automatically collapse the debit list by default
+    document.getElementById("debitList").classList.add("collapsed");
+
+    // Automatically refresh all calculations
+    updateSummary();
+
+    // Update the current date/time in the header
+    const now = new Date();
+    document.getElementById("dateTime").innerText = now.toLocaleString();
+});
