@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 /* Define custom properties for a dark animated gradient theme */
 :root {
@@ -12,9 +12,10 @@
     --transition-speed: 0.3s;
 }
 
-/* Animated Background on Body */
+/* Global Font Size Increased */
 body {
     font-family: 'Roboto', sans-serif;
+    font-size: 18px; /* Base font size increased */
     background: linear-gradient(45deg, var(--bg-start), var(--bg-mid), var(--bg-end));
     background-size: 600% 600%;
     animation: gradientShift 15s ease infinite;
@@ -55,7 +56,7 @@ body {
         padding: 14px 16px;
         color: #fff;
         transition: background var(--transition-speed);
-        font-size: 17px;
+        font-size: 18px;
     }
 
         .tab button:hover {
@@ -66,16 +67,40 @@ body {
             background-color: var(--accent-color);
         }
 
+/* Styling for Data Management Buttons */
+.data-management {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+    .data-management button {
+        margin: 8px;
+        padding: 10px 15px;
+        font-size: 16px;
+        background: var(--accent-color);
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+    }
+
+        .data-management button:hover {
+            background: var(--accent-hover);
+        }
+
 /* Tab Content */
 .tabcontent {
     display: none;
 }
 
-/* Finance Columns Layout */
 .finance-columns {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 10px; /* Reduced space between columns */
+    justify-content: center; /* Ensure columns are visually closer */
+    max-width: 900px; /* Slightly wider max width */
+    margin: 0 auto;
 }
 
 .column-left,
@@ -93,24 +118,30 @@ header {
     margin-bottom: 20px;
 }
 
-/* Sections */
+/* Sections (General styling for sections) */
 section {
     background: rgba(0, 0, 0, 0.6);
     padding: 20px;
     margin: 10px auto;
     border-radius: 10px;
-    max-width: 700px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     transition: transform var(--transition-speed);
+    display: block;
 }
 
     section:hover {
         transform: translateY(-5px);
     }
 
+/* Data Entry Sections: Limit width to 370px */
+.data-entry {
+    max-width: 370px;
+    margin: 0 auto;
+}
+
 /* Collapsible Direct Debit List with Scrollbar */
 #debitList {
-    max-height: 600px; /* Fixed height for scrollable content */
+    max-height: 600px;
     overflow-y: auto;
     transition: max-height var(--transition-speed);
 }
@@ -125,7 +156,7 @@ select {
     padding: 12px;
     margin: 8px;
     width: calc(100% - 24px);
-    background: var(--bg-end); /* Slightly lighter for contrast */
+    background: var(--bg-end);
     color: #fff;
     border: 1px solid var(--border-color);
     border-radius: 5px;
@@ -176,7 +207,7 @@ li {
     padding: 10px;
     margin: 6px auto;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     transition: transform var(--transition-speed);
 }
 
@@ -191,48 +222,28 @@ li {
     border: 2px solid var(--accent-hover);
 }
 
-/* Table Styling for Vehicle Tracker */
-#vehicleTable {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: separate;
-    border-spacing: 0 10px;
+/* Vehicle Tracker Entry Styles: Add clear division and limit max-width */
+.vehicle-entry {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    max-width: 370px;
+    margin-left: auto;
+    margin-right: auto;
 }
-
-    #vehicleTable th,
-    #vehicleTable td {
-        padding: 15px 20px;
-        border: 1px solid var(--border-color);
-        text-align: center;
-        background: var(--bg-end);
-    }
-
-    #vehicleTable th {
-        background: var(--accent-color);
-        font-weight: 700;
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    /* Enlarge Date Inputs for Vehicle Tracker */
-    #vehicleTable input[type="date"] {
-        font-size: 1.2em;
-        padding: 8px;
-    }
 
 /* Mobile Responsive Adjustments */
 @media screen and (max-width: 600px) {
-    /* Stack finance columns vertically */
     .finance-columns {
         flex-direction: column;
     }
 
-    /* Adjust tab button size */
     .tab button {
         font-size: 16px;
         padding: 12px 14px;
     }
 
-    /* Increase touch target sizes */
     input,
     select,
     button {
@@ -245,21 +256,8 @@ li {
         padding: 15px;
     }
 
-    /* Optimize Vehicle Tracker */
-    #vehicleTable {
-        width: 100%;
-        overflow-x: auto;
-        display: block;
+    #vehicles {
+        display: flex;
+        flex-direction: column;
     }
-
-        #vehicleTable th,
-        #vehicleTable td {
-            padding: 10px;
-            font-size: 0.9em;
-        }
-
-        #vehicleTable input[type="date"] {
-            font-size: 1em;
-            padding: 6px;
-        }
 }
