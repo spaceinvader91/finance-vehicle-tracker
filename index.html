@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -14,20 +14,26 @@
         <button onclick="clearLocalData()">Clear Local Data</button>
     </div>
 
+    <!-- Data Management Section: Export / Import -->
+    <div class="data-management">
+        <button onclick="exportLocalData()">Export Data</button>
+        <button onclick="triggerImport()">Import Data</button>
+        <input type="file" id="importFile" onchange="importLocalData(event)" accept="application/json" style="display: none;" />
+    </div>
+
     <!-- Finance Tracker Tab -->
     <div id="finance" class="tabcontent">
-        <header>
-            <h1>Personal Finance Tracker</h1>
-            <p id="dateTime"></p>
-            <p>Next Payday: <span id="nextPayday"></span></p>
-            <button id="refreshButton">Refresh Data</button>
-        </header>
-
-        <!-- Two-column layout for finance tracker -->
         <div class="finance-columns">
-            <!-- Left Column: Income & Direct Debits -->
+            <!-- Left Column: Personal Finance Header, Income & Direct Debits -->
             <div class="column-left">
-                <section id="income">
+                <header class="data-entry">
+                    <h1>Personal Finance Tracker</h1>
+                    <p id="dateTime"></p>
+                    <p>Next Payday: <span id="nextPayday">N/A</span></p>
+                    <button id="refreshButton" onclick="updateSummary()">Refresh Data</button>
+                </header>
+
+                <section id="incomeSection" class="data-entry">
                     <h2>Money In</h2>
                     <label for="incomeSource">Income Source:</label>
                     <input type="text" id="incomeSource" placeholder="Income Source" />
@@ -39,7 +45,7 @@
                     <ul id="incomeList"></ul>
                 </section>
 
-                <section id="directDebits">
+                <section id="directDebits" class="data-entry">
                     <h2>Direct Debits</h2>
                     <label for="debitCompany">Company Name:</label>
                     <input type="text" id="debitCompany" placeholder="Company Name" />
@@ -57,96 +63,44 @@
                     </select>
                     <br />
                     <button onclick="addDebit()">Add Direct Debit</button>
-                    <button onclick="toggleDebitList()">Toggle Direct Debits</button>
+                    <button onclick="toggleDebitList()">Toggle Direct Debits List</button>
                     <p id="totalDebits">Total Direct Debits: <strong>€0.00</strong></p>
                     <ul id="debitList"></ul>
                 </section>
             </div>
 
-            <!-- Right Column: Savings & Monthly Spending -->
+            <!-- Right Column: Summary, Savings, and Monthly Spending -->
             <div class="column-right">
-                <section id="savings">
-                    <h2>Savings Tracker</h2>
-                    <p>
-                        Current savings:
-                        <input type="number" id="currentSavings" onchange="updateAllSavings()" />
-                        <span id="savedAmount"><strong>€0.00</strong></span>
-                    </p>
-                    <p>Estimated monthly savings: <span id="monthlySavings"><strong>€0.00</strong></span></p>
-                    <p>
-                        Savings target:
-                        <input type="number" id="savingsTarget" onchange="updateAllSavings()" />
-                    </p>
-                    <p>Estimated target date: <span id="targetDate"><strong>N/A</strong></span></p>
-                </section>
-
-                <section id="monthlySpending">
-                    <h2>Monthly Spending Calculator</h2>
-                    <p>
-                        Weekly Spending Limit:
-                        <input type="number" id="weeklySpend" onchange="updateAllSavings()" />
-                    </p>
-                    <p>
-                        Period (weeks between current and next payday):
-                        <span id="periodWeeks"><strong>0</strong></span>
-                    </p>
-                    <p>
-                        Allowed Monthly Spending:
-                        <span id="allowedSpending"><strong>€0.00</strong></span>
-                    </p>
-                    <p>
-                        Net Savings After Spending:
-                        <span id="netSavings"><strong>€0.00</strong></span>
-                    </p>
-                </section>
-
-                <section id="summary">
+                <section id="summary" class="data-entry">
                     <h2>Summary</h2>
                     <p>Total Money In: <strong id="summary-income">€0.00</strong></p>
                     <p>Total Money Out: <strong id="summary-out">€0.00</strong></p>
                     <p>Net Savings: <strong id="summary-net">€0.00</strong></p>
+                    <p>Estimated Target Date: <strong id="targetDate">N/A</strong></p>
+                    <p>Period: <span id="periodDays">0 days</span></p>
                 </section>
 
+                <section id="savingsSection" class="data-entry">
+                    <h2>Savings Tracker</h2>
+                    <p>
+                        Current Savings:
+                        <input type="number" id="currentSavings" onchange="updateSummary()" />
+                    </p>
+                    <p>
+                        Savings Target:
+                        <input type="number" id="savingsTarget" onchange="updateSummary()" />
+                    </p>
+                </section>
+
+                <section id="monthlySpending" class="data-entry">
+                    <h2>Monthly Spending Calculator</h2>
+                    <p>
+                        Weekly Spending Limit:
+                        <input type="number" id="weeklySpend" onchange="updateSummary()" />
+                    </p>
+                </section>
             </div>
         </div>
-    </div>
-
-    <!-- Vehicle Tracker Tab -->
-    <div id="vehicles" class="tabcontent" style="display:none;">
-        <h2>Vehicle Renewal Tracker</h2>
-        <p>Track MOT, Insurance and Tax renewal dates for your vehicles below.</p>
-        <table id="vehicleTable">
-            <thead>
-                <tr>
-                    <th>Vehicle</th>
-                    <th>MOT Renewal Date</th>
-                    <th>Insurance Renewal Date</th>
-                    <th>Tax Renewal Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input type="text" id="vehicle1Name" placeholder="Vehicle 1" /></td>
-                    <td><input type="date" id="vehicle1Mot" /></td>
-                    <td><input type="date" id="vehicle1Insurance" /></td>
-                    <td><input type="date" id="vehicle1Tax" /></td>
-                </tr>
-                <tr>
-                    <td><input type="text" id="vehicle2Name" placeholder="Vehicle 2" /></td>
-                    <td><input type="date" id="vehicle2Mot" /></td>
-                    <td><input type="date" id="vehicle2Insurance" /></td>
-                    <td><input type="date" id="vehicle2Tax" /></td>
-                </tr>
-                <tr>
-                    <td><input type="text" id="vehicle3Name" placeholder="Vehicle 3" /></td>
-                    <td><input type="date" id="vehicle3Mot" /></td>
-                    <td><input type="date" id="vehicle3Insurance" /></td>
-                    <td><input type="date" id="vehicle3Tax" /></td>
-                </tr>
-            </tbody>
-        </table>
-        <!-- Centered Save Vehicle Data Button -->
-        <button onclick="saveVehicleData()" style="display: block; margin: 20px auto;">Save Vehicle Data</button>
     </div>
 
     <script src="script.js"></script>
