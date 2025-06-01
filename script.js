@@ -57,12 +57,12 @@ function loadDirectDebitsList() {
 
 // VEHICLE TRACKER FUNCTIONS
 
-// Load vehicle data from localStorage into the Vehicle Tracker tab
+// Load vehicle data for 3 vehicles from localStorage into the Vehicle Tracker tab
 function loadVehicleData() {
   let data = localStorage.getItem("vehicleData");
   if (data) {
     let vehicles = JSON.parse(data);
-    for (let i = 1; i <= vehicles.length; i++) {
+    for (let i = 1; i <= 3; i++) {
       if (vehicles[i - 1]) {
         document.getElementById("vehicle" + i + "Name").value = vehicles[i - 1].name;
         document.getElementById("vehicle" + i + "Mot").value = vehicles[i - 1].mot;
@@ -73,19 +73,37 @@ function loadVehicleData() {
   }
 }
 
-// Save vehicle data from the Vehicle Tracker tab into localStorage
+// Save vehicle data for 3 vehicles from the Vehicle Tracker tab into localStorage
 function saveVehicleData() {
   let vehicles = [];
-  let vehicle = {
-    name: document.getElementById("vehicle1Name").value,
-    mot: document.getElementById("vehicle1Mot").value,
-    insurance: document.getElementById("vehicle1Insurance").value,
-    tax: document.getElementById("vehicle1Tax").value
-  };
-  vehicles.push(vehicle);
+  for (let i = 1; i <= 3; i++) {
+    vehicles.push({
+      name: document.getElementById("vehicle" + i + "Name").value,
+      mot: document.getElementById("vehicle" + i + "Mot").value,
+      insurance: document.getElementById("vehicle" + i + "Insurance").value,
+      tax: document.getElementById("vehicle" + i + "Tax").value
+    });
+  }
   localStorage.setItem("vehicleData", JSON.stringify(vehicles));
   alert("Vehicle data saved!");
 }
+
+// Load monthly spending, current savings, and savings target from localStorage.
+function loadFinanceData() {
+    const weeklySpend = localStorage.getItem("weeklySpend");
+    if (weeklySpend !== null) {
+        document.getElementById("weeklySpend").value = weeklySpend;
+    }
+    const currentSavings = localStorage.getItem("currentSavings");
+    if (currentSavings !== null) {
+        document.getElementById("currentSavings").value = currentSavings;
+    }
+    const savingsTarget = localStorage.getItem("savingsTarget");
+    if (savingsTarget !== null) {
+        document.getElementById("savingsTarget").value = savingsTarget;
+    }
+}
+
 
 // FINANCE FUNCTIONS
 
@@ -101,32 +119,40 @@ function addIncome() {
 
 // Add Direct Debit entry
 function addDebit() {
-  const company = document.getElementById("debitCompany").value;
-  const amount = parseFloat(document.getElementById("debitAmount").value);
-  const paymentDay = parseInt(document.getElementById("debitDay").value);
-  const currency = document.getElementById("currencySelector").value;
-  if (!company || isNaN(amount) || isNaN(paymentDay)) return;
-  
-  let paymentDate = new Date();
-  paymentDate.setDate(paymentDay);
-  // Adjust for weekend if necessary:
-  if (paymentDate.getDay() === 6) {
-    paymentDate.setDate(paymentDate.getDate() + 2);
-  } else if (paymentDate.getDay() === 0) {
-    paymentDate.setDate(paymentDate.getDate() + 1);
-  }
-  
-  const li = document.createElement("li");
-  li.setAttribute("data-due", paymentDate.toISOString());
-  li.innerHTML = `${company}: ${currency}${amount.toFixed(2)} (Due: ${paymentDate.toDateString()}) 
-  <button onclick="markAsPaid(this)">Mark as Paid</button>
-  <button onclick="removeDebit(this)">Remove</button>`;
-  
-  document.getElementById("debitList").appendChild(li);
-  sortDebits();
-  saveDirectDebitsList();
-  updateSummary();
+    const company = document.getElementById("debitCompany").value;
+    const amount = parseFloat(document.getElementById("debitAmount").value);
+    const paymentDay = parseInt(document.getElementById("debitDay").value);
+    const currency = document.getElementById("currencySelector").value;
+    if (!company || isNaN(amount) || isNaN(paymentDay)) return;
+
+    let paymentDate = new Date();
+    paymentDate.setDate(paymentDay);
+    // Adjust for weekend if necessary:
+    if (paymentDate.getDay() === 6) {
+        paymentDate.setDate(paymentDate.getDate() + 2);
+    } else if (paymentDate.getDay() === 0) {
+        paymentDate.setDate(paymentDate.getDate() + 1);
+    }
+
+    const li = document.createElement("li");
+    li.setAttribute("data-due", paymentDate.toISOString());
+    li.innerHTML = `
+    <div class="debit-info">
+      <span class="debit-company">${company}:</span> <span class="debit-amount"><strong>${currency}${amount.toFixed(2)}</strong></span>
+    </div>
+    <div class="debit-date"><strong>${formatDate(paymentDate)}</strong></div>
+    <div class="debit-buttons">
+      <button onclick="markAsPaid(this)">Mark as Paid</button>
+      <button onclick="removeDebit(this)">Remove</button>
+    </div>
+  `;
+
+    document.getElementById("debitList").appendChild(li);
+    sortDebits();
+    saveDirectDebitsList();
+    updateSummary();
 }
+
 
 // Sort Direct Debits by due date
 function sortDebits() {
@@ -136,6 +162,17 @@ function sortDebits() {
   items.forEach(item => list.appendChild(item));
   saveDirectDebitsList();
 }
+
+//Format Direct Debit Dates
+function formatDate(date) {
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = dayNames[date.getDay()];
+    const day = ("0" + date.getDate()).slice(-2);       // Two-digit day
+    const month = ("0" + (date.getMonth() + 1)).slice(-2); // Two-digit month
+    const year = date.getFullYear();
+    return `${dayName} - ${day}/${month}/${year}`;
+}
+
 
 // Toggle "paid" status on a Debit
 function markAsPaid(btn) {
@@ -147,10 +184,12 @@ function markAsPaid(btn) {
 
 // Remove a Debit item
 function removeDebit(btn) {
-  const li = btn.parentElement;
-  li.remove();
-  saveDirectDebitsList();
-  updateSummary();
+    const li = btn.closest("li");
+    if (li) {
+        li.remove();
+    }
+    saveDirectDebitsList();
+    updateSummary();
 }
 
 // Collapse/Expand Direct Debit List
@@ -201,7 +240,7 @@ function getLastFriday(year, month) {
   return lastDay;
 }
 
-// Returns the next payday
+// Returns the next payday.
 // If today is before the last Friday of this month, return that; otherwise, return next month's last Friday.
 function getNextPayday() {
   let today = new Date();
@@ -214,7 +253,7 @@ function getNextPayday() {
 }
 
 // Calculate Estimated Target Date based on paydays.
-// It computes how many paydays (last Friday of each month) are needed given:
+// It computes how many paydays (last Friday of each month) are needed using:
 //    (savingsTarget - currentSavings) / netSavings
 // Then it returns the date of the final payday.
 function calculateEstimatedTargetDate(currentSavings, savingsTarget, netSavings) {
@@ -326,22 +365,24 @@ function triggerImport() {
 
 // INITIALIZATION: run after DOM loads
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    const refreshButton = document.getElementById("refreshButton");
-    if (refreshButton) {
-      refreshButton.addEventListener("click", updateSummary);
-    } else {
-      console.error("Element 'refreshButton' not found.");
-    }
-    const defaultOpen = document.getElementById("defaultOpen");
-    if (defaultOpen) defaultOpen.click();
-    loadIncomeList();
-    loadDirectDebitsList();
-    loadVehicleData();
-    updateSummary();
-    const debitList = document.getElementById("debitList");
-    if (debitList) {
-      debitList.classList.add("collapsed");
-    }
-  }, 100);
+    setTimeout(() => {
+        const refreshButton = document.getElementById("refreshButton");
+        if (refreshButton) {
+            refreshButton.addEventListener("click", updateSummary);
+        } else {
+            console.error("Element 'refreshButton' not found.");
+        }
+        const defaultOpen = document.getElementById("defaultOpen");
+        if (defaultOpen) defaultOpen.click();
+        loadIncomeList();
+        loadDirectDebitsList();
+        loadVehicleData();
+        updateSummary();
+        loadFinanceData();
+        const debitList = document.getElementById("debitList");
+        if (debitList) {
+            debitList.classList.add("collapsed");
+        }
+    }, 100);
 });
+
