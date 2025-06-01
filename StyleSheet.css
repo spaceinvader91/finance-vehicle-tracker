@@ -86,14 +86,19 @@ body {
             background: var(--accent-hover);
         }
 
-.finance-columns {
+/* Finance Grid for 5 columns */
+.finance-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
-    max-width: 900px;
-    margin: 0 auto;
 }
+
+    .finance-grid section.data-entry {
+        flex: 1 1 18%;
+        min-width: 200px;
+        box-sizing: border-box;
+    }
 
 section {
     background: rgba(0, 0, 0, 0.6);
@@ -109,26 +114,27 @@ section {
     }
 
 .data-entry {
-    max-width: 370px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
+/* Input fields styling to blend with the text */
 input,
 select {
     padding: 12px;
     margin: 8px;
     width: calc(100% - 24px);
-    background: var(--bg-end);
+    background: transparent;
     color: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    transition: all var(--transition-speed) ease-in-out;
+    border: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
     font-size: 1em;
+    transition: border-bottom 0.3s ease;
 }
 
     input:focus,
     select:focus {
-        border-color: var(--accent-color);
+        border-bottom-color: var(--accent-color);
         outline: none;
     }
 
@@ -178,22 +184,100 @@ li {
     border: 2px solid var(--accent-hover);
 }
 
-.vehicle-entry {
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    max-width: 370px;
-    margin: 0 auto;
+/* Direct Debit List Formatting */
+.debit-info {
+    margin-bottom: 5px;
 }
 
-/* Add rule for collapsed direct debits list */
+.debit-date {
+    margin-bottom: 5px;
+}
+
+.debit-buttons button {
+    margin-right: 5px;
+}
+
+/* Vehicle Tracker Styles */
+
+/* Update vehicle container spacing */
+.vehicle-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Reduced spacing */
+    justify-content: center;
+}
+
+/* Use similar styling for vehicle entries as finance sections */
+.vehicle-entry {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+    flex: 1 1 300px;
+    margin-bottom: 20px;
+}
+
+    /* Vehicle Tracker: Improve readability for data entry */
+    .vehicle-entry label {
+        font-weight: bold;
+        color: var(--accent-color); /* using the accent color to make labels stand out */
+    }
+
+    .vehicle-entry input[type="date"] {
+        font-weight: bold;
+        color: #fff; /* white text for readability on a dark background */
+        background-color: rgba(0, 0, 0, 0.85); /* slightly darker background for contrast */
+        border: 1px solid var(--accent-color);
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    /* Optional: Make the vehicle names (h3 headings) even more prominent */
+    .vehicle-entry h3 {
+        color: var(--accent-color);
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+
+/* Vehicle Tracker: Improve readability for data entry */
+.vehicle-entry label {
+  font-weight: bold;
+  color: var(--accent-color); /* using the accent color to make labels stand out */
+}
+
+.vehicle-entry input[type="date"] {
+  font-weight: bold;
+  color: #fff; /* white text for readability on a dark background */
+  background-color: rgba(0, 0, 0, 0.85); /* slightly darker background for contrast */
+  border: 1px solid var(--accent-color);
+  padding: 8px;
+  border-radius: 5px;
+}
+
+/* Optional: Make the vehicle names (h3 headings) even more prominent */
+.vehicle-entry h3 {
+  color: var(--accent-color);
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+
+/* Divider at the Bottom */
+.footer-divider {
+    border: none;
+    height: 2px;
+    background: var(--accent-color);
+    margin-top: 40px;
+}
+
+/* Collapsed direct debits list */
 #debitList.collapsed {
     display: none;
 }
 
 @media screen and (max-width: 600px) {
-    .finance-columns {
+    .finance-grid {
         flex-direction: column;
     }
 
@@ -214,5 +298,6 @@ li {
     #vehicles {
         display: flex;
         flex-direction: column;
+        align-items: center;
     }
 }
