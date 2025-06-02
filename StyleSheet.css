@@ -118,7 +118,7 @@ section {
     margin: 0 auto;
 }
 
-/* Input fields styling to blend with the text */
+/* Input fields styling */
 input,
 select {
     padding: 12px;
@@ -197,9 +197,64 @@ li {
     margin-right: 5px;
 }
 
-/* Vehicle Tracker Styles */
+/* Currency Switch Styling */
+.currency-switch {
+    display: inline-flex;
+    align-items: center;
+    margin: 8px 0;
+}
 
-/* Update vehicle container spacing */
+.currency-label {
+    margin: 0 5px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    margin: 0 10px;
+}
+
+    .switch input {
+        display: none;
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+.switch input:checked + .slider {
+    background-color: var(--accent-color);
+}
+
+    .switch input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+/* Vehicle Tracker Styles */
 .vehicle-container {
     display: flex;
     flex-wrap: wrap;
@@ -207,7 +262,6 @@ li {
     justify-content: center;
 }
 
-/* Use similar styling for vehicle entries as finance sections */
 .vehicle-entry {
     background: rgba(0, 0, 0, 0.6);
     padding: 20px;
@@ -217,51 +271,25 @@ li {
     margin-bottom: 20px;
 }
 
-    /* Vehicle Tracker: Improve readability for data entry */
     .vehicle-entry label {
         font-weight: bold;
-        color: var(--accent-color); /* using the accent color to make labels stand out */
+        color: var(--accent-color);
     }
 
     .vehicle-entry input[type="date"] {
         font-weight: bold;
-        color: #fff; /* white text for readability on a dark background */
-        background-color: rgba(0, 0, 0, 0.85); /* slightly darker background for contrast */
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.85);
         border: 1px solid var(--accent-color);
         padding: 8px;
         border-radius: 5px;
     }
 
-    /* Optional: Make the vehicle names (h3 headings) even more prominent */
     .vehicle-entry h3 {
         color: var(--accent-color);
         font-weight: bold;
         margin-bottom: 10px;
     }
-
-
-/* Vehicle Tracker: Improve readability for data entry */
-.vehicle-entry label {
-  font-weight: bold;
-  color: var(--accent-color); /* using the accent color to make labels stand out */
-}
-
-.vehicle-entry input[type="date"] {
-  font-weight: bold;
-  color: #fff; /* white text for readability on a dark background */
-  background-color: rgba(0, 0, 0, 0.85); /* slightly darker background for contrast */
-  border: 1px solid var(--accent-color);
-  padding: 8px;
-  border-radius: 5px;
-}
-
-/* Optional: Make the vehicle names (h3 headings) even more prominent */
-.vehicle-entry h3 {
-  color: var(--accent-color);
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
 
 /* Divider at the Bottom */
 .footer-divider {
@@ -271,7 +299,6 @@ li {
     margin-top: 40px;
 }
 
-/* Collapsed direct debits list */
 #debitList.collapsed {
     display: none;
 }
