@@ -87,11 +87,16 @@
                 <label for="debitDay">Payment Day:</label>
                 <input type="number" id="debitDay" placeholder="Payment Day" />
                 <br />
-                <label for="currencySelector">Currency:</label>
-                <select id="currencySelector">
-                    <option value="€">€ EUR</option>
-                    <option value="£">£ GBP</option>
-                </select>
+                <!-- Change currency selection from dropdown to a switch -->
+                <label>Currency:</label>
+                <div class="currency-switch">
+                    <span class="currency-label">EUR</span>
+                    <label class="switch">
+                        <input type="checkbox" id="currencySwitch">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="currency-label">GBP</span>
+                </div>
                 <br />
                 <button onclick="addDebit()">Add Direct Debit</button>
                 <button onclick="toggleDebitList()">Toggle Direct Debits List</button>
@@ -105,7 +110,7 @@
     <div id="vehicles" class="tabcontent">
         <h2 style="text-align: center;">Vehicle Renewal Tracker</h2>
         <div class="vehicle-container">
-            <!-- Vehicle 1: Hard-coded as Ford Fiesta -->
+            <!-- Vehicle 1 -->
             <section class="vehicle-entry data-entry">
                 <h3>Ford Fiesta</h3>
                 <label>MOT Renewal Date:</label>
@@ -117,7 +122,7 @@
                 <label>Tax Renewal Date:</label>
                 <input type="date" id="vehicle1Tax" />
             </section>
-            <!-- Vehicle 2: Hard-coded as Kawasaki Z900 -->
+            <!-- Vehicle 2 -->
             <section class="vehicle-entry data-entry">
                 <h3>Kawasaki Z900</h3>
                 <label>MOT Renewal Date:</label>
@@ -129,7 +134,7 @@
                 <label>Tax Renewal Date:</label>
                 <input type="date" id="vehicle2Tax" />
             </section>
-            <!-- Vehicle 3: Hard-coded as Yamaha Fazer -->
+            <!-- Vehicle 3 -->
             <section class="vehicle-entry data-entry">
                 <h3>Yamaha Fazer</h3>
                 <label>MOT Renewal Date:</label>
